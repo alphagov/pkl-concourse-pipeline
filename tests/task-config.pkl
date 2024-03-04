@@ -1,0 +1,32 @@
+amends "../src/TaskConfig.pkl"
+
+platform = "linux"
+image_resource = new {
+    type = "registry-image"
+    source = new {
+        ["repository"] = "governmentdigitalservice/pay-node-runner"
+        ["tag"] = "node18"
+    }
+}
+
+inputs = new {
+    new {
+        name = "pay-ci"
+    }
+}
+
+outputs = new {
+    new {
+        name = "assume-role"
+    }
+}
+
+params = new {
+    ["AWS_ROLE_ARN"] = ""
+    ["AWS_ROLE_SESSION_NAME"] = ""
+}
+
+run = new {
+    path = "node"
+    args = new { "pay-ci/ci/scripts/assume-role.js" }
+}

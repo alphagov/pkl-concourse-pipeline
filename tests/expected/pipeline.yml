@@ -1,0 +1,28 @@
+jobs:
+- name: test-job
+  plan:
+  - get: pkl-concourse-pipeline-src
+    trigger: true
+  - task: test-task-step
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: governmentdigitalservice/pay-node-runner
+          tag: node18
+      run:
+        path: node
+        args:
+        - echo "hello"
+resources:
+- name: pkl-concourse-pipeline-src
+  type: git
+  source:
+    uri: https://github.com/alphagov/pkl-concourse-pipeline
+    branch: main
+  icon: github
+groups:
+- name: pipeline
+  jobs:
+  - test-job

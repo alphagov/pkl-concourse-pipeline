@@ -1,0 +1,37 @@
+name: Github Actions Tests
+
+on:
+  workflow_call:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  detect-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - name: Detect secrets
+        uses: alphagov/pay-ci/actions/detect-secrets@master
+
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - name: Install pkl
+        run: |
+
+          curl -L -o pkl https://github.com/apple/pkl/releases/download/0.25.2/pkl-linux-amd64
+          chmod u+x pkl
+      - name: Validate Task Config
+        run: |
+          set -o pipefail
+          ./pkl eval tests/task-config.pkl | diff tests/expected/task-config.yml -
+      - name: Validate Pipeline Config
+        run: |
+          set -o pipefail
+          ./pkl eval tests/pipeline.pkl | diff tests/expected/pipeline.yml -
