@@ -1,7 +1,6 @@
 name: Post Merge
 
 on:
-  pull_request:  # TODO: REMOVE THIS
   push:
     branches:
       - main
@@ -18,8 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
-      # TODO This will need contents: write later
+      contents: write
 
     name: Check for, and perform release
     steps:
@@ -85,10 +83,5 @@ jobs:
         env:
           MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
         run: |
-          # TODO: Remove the debug output below
-          echo "Would run command: "
-          cat <<EOF
+          echo "Creating release ${MODULE_VERSION}"
           gh release create --create-notes --latest "${MODULE_VERSION}" build/*
-          EOF
-          echo "What's in build/ ?"
-          ls -la build/*

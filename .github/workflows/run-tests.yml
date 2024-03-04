@@ -22,6 +22,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        with:
+          fetch-depth: '0'
       - name: Load pkl version
         id: load-pkl-version
         run: |
