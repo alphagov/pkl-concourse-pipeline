@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
       - name: Detect secrets
         uses: alphagov/pay-ci/actions/detect-secrets@master
 
@@ -21,12 +21,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
-      - name: Install pkl
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        with:
+          fetch-depth: '0'
+      - name: Load pkl version
+        id: load-pkl-version
         run: |
-
-          curl -L -o pkl https://github.com/apple/pkl/releases/download/0.25.2/pkl-linux-amd64
+          PKL_VERSION=$(cat .pkl-version)
+          echo "PKL_VERSION=${PKL_VERSION}" | tee -a "$GITHUB_OUTPUT"
+      - name: Install pkl
+        env:
+          PKL_VERSION: "${{ steps.load-pkl-version.outputs.PKL_VERSION }}"
+        run: |
+          curl -L -o pkl https://github.com/apple/pkl/releases/download/${PKL_VERSION}/pkl-linux-amd64
           chmod u+x pkl
+          ./pkl --version
       - name: Validate Task Config
         run: |
           set -o pipefail
@@ -35,3 +44,6 @@ jobs:
         run: |
           set -o pipefail
           ./pkl eval tests/pipeline.pkl | diff tests/expected/pipeline.yml -
+      - name: Validate package can build
+        run: |
+          ./pkl project package src/ --output-path build/
