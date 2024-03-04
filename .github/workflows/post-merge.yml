@@ -27,13 +27,13 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Load pkl version
+        id: load-pkl-version
         run: |
           PKL_VERSION=$(cat .pkl-version)
           echo "PKL_VERSION=${PKL_VERSION}" >> "$GITHUB_OUTPUT"
       - name: Install pkl
-        id: load-pkl-version
         env:
-          PKL_VERSION: ${{ steps.load-pkl-version.outputs.PKL_VERSION }}
+          PKL_VERSION: "${{ steps.load-pkl-version.outputs.PKL_VERSION }}"
         run: |
           curl -L -o pkl https://github.com/apple/pkl/releases/download/${PKL_VERSION}/pkl-linux-amd64
           chmod u+x pkl
