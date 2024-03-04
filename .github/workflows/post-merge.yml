@@ -82,6 +82,7 @@ jobs:
         name: Release new version
         env:
           MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
+          GH_TOKEN: "${{ github.token }}"
         run: |
           echo "Creating release ${MODULE_VERSION}"
           gh release create --generate-notes --latest "${MODULE_VERSION}" build/*
