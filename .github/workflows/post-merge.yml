@@ -30,18 +30,26 @@ jobs:
         id: load-pkl-version
         run: |
           PKL_VERSION=$(cat .pkl-version)
-          echo "PKL_VERSION=${PKL_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "PKL_VERSION=${PKL_VERSION}" | tee -a "$GITHUB_OUTPUT"
       - name: Install pkl
         env:
           PKL_VERSION: "${{ steps.load-pkl-version.outputs.PKL_VERSION }}"
         run: |
           curl -L -o pkl https://github.com/apple/pkl/releases/download/${PKL_VERSION}/pkl-linux-amd64
           chmod u+x pkl
+          ./pkl --version
       - name: Get pkl module version
         id: load-module-version
         run: |
           set -o pipefail
+
           MODULE_VERSION=$(./pkl eval -f json src/PklProject | jq -r .package.version)
+          if [ -z "${MODULE_VERSION:-}" ]; then
+            echo "Couldn't read module version!"
+            exit 1
+          fi
+
+          echo "MODULE_VERSION=${MODULE_VERSION}" | tee -a "$GITHUB_OUTPUT"
       - name: Check for existing release
         id: check-for-existing-release
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
@@ -50,6 +58,7 @@ jobs:
         with:
           script: |
             const module_version = process.env.MODULE_VERSION;
+            console.log(`Checking for a release of version ${module_version}`)
 
             try {
               const release = await github.rest.repos.getReleaseByTag({
@@ -61,6 +70,7 @@ jobs:
               core.setOutput('RELEASE_EXISTS', 'true')
             } catch (error) {
               if (error.status === 404) {
+                console.log("No release found, release required")
                 core.setOutput('RELEASE_EXISTS', 'false')
                 return
               }

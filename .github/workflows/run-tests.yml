@@ -26,13 +26,14 @@ jobs:
         id: load-pkl-version
         run: |
           PKL_VERSION=$(cat .pkl-version)
-          echo "PKL_VERSION=${PKL_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "PKL_VERSION=${PKL_VERSION}" | tee -a "$GITHUB_OUTPUT"
       - name: Install pkl
         env:
-          PKL_VERSION: ${{ steps.load-pkl-version.outputs.PKL_VERSION }}
+          PKL_VERSION: "${{ steps.load-pkl-version.outputs.PKL_VERSION }}"
         run: |
           curl -L -o pkl https://github.com/apple/pkl/releases/download/${PKL_VERSION}/pkl-linux-amd64
           chmod u+x pkl
+          ./pkl --version
       - name: Validate Task Config
         run: |
           set -o pipefail
