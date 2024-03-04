@@ -23,7 +23,7 @@ jobs:
 
     name: Check for, and perform release
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
           fetch-depth: '0'
       - name: Load pkl version
@@ -45,9 +45,9 @@ jobs:
       - name: Check for existing release
         id: check-for-existing-release
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        env:
+          MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
         with:
-          env:
-            MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
           script: |
             const module_version = process.env.MODULE_VERSION;
 
@@ -67,11 +67,11 @@ jobs:
               throw error
             }
       - name: Build new version
-        if: ${{ steps.check-for-existing-release.outputs.RELEASE_EXISTS === "false" }}
+        if: steps.check-for-existing-release.outputs.RELEASE_EXISTS == "false"
         run: |
           ./pkl project package src/ --output-path build/
       - name: Release new version
-        if: ${{ steps.check-for-existing-release.outputs.RELEASE_EXISTS === "false" }}
+        if: steps.check-for-existing-release.outputs.RELEASE_EXISTS == "false"
         env:
           MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
         run: |
