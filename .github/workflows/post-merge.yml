@@ -66,12 +66,12 @@ jobs:
               }
               throw error
             }
-      - name: Build new version
-        if: ${{ steps.check-for-existing-release.outputs.RELEASE_EXISTS == "false" }}
+      - if: steps.check-for-existing-release.outputs.RELEASE_EXISTS == 'false'
+        name: Build new version
         run: |
           ./pkl project package src/ --output-path build/
-      - name: Release new version
-        if: ${{ steps.check-for-existing-release.outputs.RELEASE_EXISTS == "false" }}
+      - if: steps.check-for-existing-release.outputs.RELEASE_EXISTS == 'false'
+        name: Release new version
         env:
           MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
         run: |
