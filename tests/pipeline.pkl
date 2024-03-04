@@ -1,0 +1,53 @@
+amends "../src/Pipeline.pkl"
+
+jobs = new {
+  new {
+    name = "test-job"
+    plan = new {
+      new GetStep {
+        get = "pkl-concourse-pipeline-src"
+        trigger = true
+      }
+      new TaskStep {
+        task = "test-task-step"
+        config = new {
+          platform = "linux"
+          image_resource = new {
+            type = "registry-image"
+            source = new {
+                ["repository"] = "governmentdigitalservice/pay-node-runner"
+                ["tag"] = "node18"
+            }
+          }
+          run = new {
+            path = "node"
+            args = new {
+              #"echo "hello""#
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resources = new {
+  new {
+    name = "pkl-concourse-pipeline-src"
+    type = "git"
+    icon = "github"
+    source = new {
+      ["uri"] = "https://github.com/alphagov/pkl-concourse-pipeline"
+      ["branch"] = "main"
+    }
+  }
+}
+
+groups = new {
+  new {
+    name = "pipeline"
+    jobs = new {
+      "test-job"
+    }
+  }
+}

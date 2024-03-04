@@ -1,0 +1,17 @@
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: governmentdigitalservice/pay-node-runner
+    tag: node18
+inputs:
+- name: pay-ci
+outputs:
+- name: assume-role
+params:
+  AWS_ROLE_ARN: ''
+  AWS_ROLE_SESSION_NAME: ''
+run:
+  path: node
+  args:
+  - pay-ci/ci/scripts/assume-role.js

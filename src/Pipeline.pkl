@@ -1,0 +1,224 @@
+open module concourse_pipeline.Pipeline
+
+import "./TaskConfig.pkl"
+
+jobs: Listing<Job>
+resources: Listing<Resource>?
+resource_types: Listing<ResourceType>?
+var_sources: Listing<VarSource>?
+groups: Listing<Group>?
+display: Display?
+
+open class Resource {
+    name: Identifier
+    type: Identifier
+    source: Config
+    old_name: Identifier?
+    icon: String?
+    version: Version?
+    check_every: (ConcourseDuration | "never")?
+    check_timeout: Duration?
+    expose_build_created_by: Boolean?
+    tags: Listing<String>?
+    public: Boolean?
+    webhook_token: String?
+}
+
+open class ResourceType {
+    name: Identifier
+    type: Identifier
+    source: Config
+    privileged: Boolean?
+    params: Config?
+    check_every: ConcourseDuration?
+    tags: Listing<String>?
+    defaults: Config?
+}
+
+open class Group {
+    name: Identifier
+    jobs: Listing<Identifier>?
+}
+
+open class Display {
+    background_image: String?
+}
+
+open class Job {
+    name: Identifier
+    plan: Listing<Step>
+    old_name: Identifier?
+    serial: Boolean?
+    serial_groups: Listing<Identifier>?
+    max_in_flight: Int?
+    build_log_retention: BuildLogRetentionPolicy?
+    build_logs_to_retain: Int?
+    public: Boolean?
+    disable_manual_trigger: Boolean?
+    interruptible: Boolean?
+    on_success: Step?
+    on_failure: Step?
+    on_error: Step?
+    on_abort: Step?
+    ensure: Step?
+}
+
+open class BuildLogRetentionPolicy {
+    days: Int?
+    builds: Int?
+    minimum_succeeded_builds: Int(builds > 0)?
+}
+
+abstract class Step {
+    timeout: ConcourseDuration?
+    attempts: Int?
+    tags: Listing<String>?
+    on_success: Step?
+    on_failure: Step?
+    on_abort: Step?
+    on_error: Step?
+    ensure: Step?
+}
+
+abstract class AcrossCapableStep extends Step {
+    across: Listing<AcrossVar>?
+}
+
+open class AcrossVar {
+    var: Identifier
+    values: Listing<Value>
+    max_in_flight: (Int | "all")?
+    fail_fast: Boolean?
+}
+
+open class GetStep extends Step {
+    get: Identifier
+    resource: Identifier?
+    passed: Listing<Identifier>?
+    params: Config?
+    trigger: Boolean?
+    version: (Version | "every" | "latest")?
+}
+
+open class PutStep extends Step {
+    put: Identifier?
+    resource: Identifier?
+    inputs: (Listing<Identifier> | "all" | "detect")?
+    params: Config?
+    get_params: Config?
+    no_get: Boolean?
+}
+
+open class TaskStep extends AcrossCapableStep {
+    task: Identifier
+    config: TaskConfig?
+    file: FilePath?
+    image: Identifier?
+    privileged: Boolean?
+    vars: Vars?
+    container_limits: ContainerLimits?
+    params: EnvVars?
+    input_mapping: Mapping<Identifier, Identifier>?
+    output_mapping: Mapping<Identifier, Identifier>?
+}
+
+open class SetPipelineStep extends AcrossCapableStep {
+    set_pipeline: Identifier | "self"
+    file: FilePath
+    instance_vars: Vars?
+    vars: Vars?
+    var_files: Listing<FilePath>?
+    team: Identifier?
+}
+
+open class LoadVarStep extends AcrossCapableStep {
+    load_var: Identifier
+    file: FilePath
+    format: ("json" | "yaml" | "yml" | "trim" | "raw")?
+    reveal: Boolean?
+}
+
+open class InParallelStep extends AcrossCapableStep {
+    in_parallel: InParallelConfig | Listing<Step>
+}
+
+open class DoStep extends AcrossCapableStep {
+    do: Listing<Step>
+}
+
+open class TryStep extends AcrossCapableStep {
+    try: Step
+}
+
+open class ContainerLimits {
+    cpu: Int?
+    memory: Int?
+}
+
+open class InParallelConfig {
+    steps: Listing<Step>
+    limit: Int?
+    fail_fast: Boolean?
+}
+
+abstract class VarSource {
+    name: Identifier
+}
+
+open class VaultVarSource extends VarSource {
+    type: "vault"
+    config: VaultConfig
+}
+
+open class VaultConfig {
+    url: String
+    ca_cert: String?
+    path_prefix: String?
+    lookup_templates: Listing<String>?
+    shared_path: String?
+    namespace: String?
+    client_cert: String?
+    client_key: String?
+    server_name: String?
+    insecure_skip_verify: Boolean?
+    client_token: String?
+    auth_backend: String?
+    auth_params: Mapping<String, String>?
+    auth_max_ttl: ConcourseDuration?
+    auth_retry_max: ConcourseDuration?
+    auth_retry_initial: ConcourseDuration?
+}
+
+open class SSMVarSource extends VarSource {
+    type: "ssm"
+    config: SSMConfig
+}
+
+open class SSMConfig {
+    region: String
+}
+
+open class DummyVarSource extends VarSource {
+    type: "dummy"
+    config: DummyConfig
+}
+
+open class DummyConfig {
+    vars: Vars
+}
+
+typealias Config = Mapping<String, Any>
+typealias Vars = Mapping<String, Any>
+typealias EnvVars = Mapping<String, String>
+typealias Value = Any
+// Note, this regex is directly from the concourse docs https://concourse-ci.org/config-basics.html#schema.identifier
+typealias Identifier = String(matches(Regex(#"[\p{Ll}\p{Lt}\p{Lm}\p{Lo}][\p{Ll}\p{Lt}\p{Lm}\p{Lo}\d\-_.]*$"#)))
+typealias DirPath = String
+typealias FilePath = String
+typealias Version = Mapping<String, String>
+// Note, this regex is from the go time.format.ParseDuration source code https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/time/format.go;l=1589
+typealias ConcourseDuration = String(matches(Regex(#"[-+]?([0-9]*(\.[0-9]*)?[a-z]+)+"#)))
+
+output {
+  renderer = new YamlRenderer {}
+}

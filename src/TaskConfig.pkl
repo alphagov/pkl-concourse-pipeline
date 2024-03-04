@@ -1,0 +1,46 @@
+module concourse_pipeline.TaskConfig
+
+import "./Pipeline.pkl"
+
+platform: "linux" | "darwin" | "windows"
+image_resource: AnonymousResource
+inputs: Listing<Input>?
+outputs: Listing<Output>?
+caches: Listing<Cache>?
+params: Pipeline.EnvVars?
+run: Run
+rootfs_uri: String?
+container_limits: Pipeline.ContainerLimits?
+
+open class AnonymousResource {
+    type: Pipeline.Identifier
+    source: Pipeline.Config
+    params: Pipeline.Config?
+    version: Pipeline.Version?
+}
+
+open class Run {
+    path: Pipeline.FilePath
+    args: Listing<String>?
+    dir: Pipeline.DirPath?
+    user: String?
+}
+
+open class Input {
+    name: Pipeline.Identifier
+    path: Pipeline.DirPath?
+    optional: Boolean?
+}
+
+open class Output {
+    name: Pipeline.Identifier
+    path: Pipeline.DirPath?    
+}
+
+open class Cache {
+    path: Pipeline.DirPath    
+}
+
+output {
+    renderer = new YamlRenderer {}
+}
