@@ -1,6 +1,13 @@
 # pkl-concourse-pipeline
 A pkl module defining the schema of concourse pipelines
 
+## Releasing new versions
+
+1. Update the version number in [src/PklProject](src/PklProject) in a PR
+2. Get approval and Merge the PR
+
+The post-merge workflow will detect there needs to be a new release and will automatically create the new release in GitHub.
+
 ## Licence
 
 [MIT License](LICENSE)

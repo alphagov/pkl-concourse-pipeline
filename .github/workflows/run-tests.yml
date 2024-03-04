@@ -22,10 +22,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
-      - name: Install pkl
+      - name: Load pkl version
+        id: load-pkl-version
         run: |
-
-          curl -L -o pkl https://github.com/apple/pkl/releases/download/0.25.2/pkl-linux-amd64
+          PKL_VERSION=$(cat .pkl-version)
+          echo "PKL_VERSION=${PKL_VERSION}" >> "$GITHUB_OUTPUT"
+      - name: Install pkl
+        env:
+          PKL_VERSION: ${{ steps.load-pkl-version.outputs.PKL_VERSION }}
+        run: |
+          curl -L -o pkl https://github.com/apple/pkl/releases/download/${PKL_VERSION}/pkl-linux-amd64
           chmod u+x pkl
       - name: Validate Task Config
         run: |
@@ -35,3 +41,6 @@ jobs:
         run: |
           set -o pipefail
           ./pkl eval tests/pipeline.pkl | diff tests/expected/pipeline.yml -
+      - name: Validate package can build
+        run: |
+          ./pkl project package src/ --output-path build/

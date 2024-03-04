@@ -1,0 +1,84 @@
+name: Post Merge
+
+on:
+  pull_request:  # TODO: REMOVE THIS
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    uses: ./.github/workflows/run-tests.yml
+
+  release-package:
+    needs: tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # TODO This will need contents: write later
+
+    name: Check for, and perform release
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        with:
+          fetch-depth: '0'
+      - name: Load pkl version
+        run: |
+          PKL_VERSION=$(cat .pkl-version)
+          echo "PKL_VERSION=${PKL_VERSION}" >> "$GITHUB_OUTPUT"
+      - name: Install pkl
+        id: load-pkl-version
+        env:
+          PKL_VERSION: ${{ steps.load-pkl-version.outputs.PKL_VERSION }}
+        run: |
+          curl -L -o pkl https://github.com/apple/pkl/releases/download/${PKL_VERSION}/pkl-linux-amd64
+          chmod u+x pkl
+      - name: Get pkl module version
+        id: load-module-version
+        run: |
+          set -o pipefail
+          MODULE_VERSION=$(./pkl eval -f json src/PklProject | jq -r .package.version)
+      - name: Check for existing release
+        id: check-for-existing-release
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        with:
+          env:
+            MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
+          script: |
+            const module_version = process.env.MODULE_VERSION;
+
+            try {
+              const release = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: module_version,
+              })
+              console.log(`Release found for version ${module_version}, no need to do a new release`)
+              core.setOutput('RELEASE_EXISTS', 'true')
+            } catch (error) {
+              if (error.status === 404) {
+                core.setOutput('RELEASE_EXISTS', 'false')
+                return
+              }
+              throw error
+            }
+      - name: Build new version
+        if: ${{ steps.check-for-existing-release.outputs.RELEASE_EXISTS === "false" }}
+        run: |
+          ./pkl project package src/ --output-path build/
+      - name: Release new version
+        if: ${{ steps.check-for-existing-release.outputs.RELEASE_EXISTS === "false" }}
+        env:
+          MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
+        run: |
+          # TODO: Remove the debug output below
+          echo "Would run command: "
+          cat <<EOF
+          gh release create --create-notes --latest "${MODULE_VERSION}" build/*
+          EOF
+          echo "What's in build/ ?"
+          ls -la build/*
