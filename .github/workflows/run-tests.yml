@@ -34,4 +34,4 @@ jobs:
       - name: Validate Pipeline Config
         run: |
           set -o pipefail
-          ./pkl eval tests/pipeline.pkl | diff tests/expected/task-config.yml -
+          ./pkl eval tests/pipeline.pkl | diff tests/expected/pipeline.yml -
