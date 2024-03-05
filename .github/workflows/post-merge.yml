@@ -42,27 +42,32 @@ jobs:
           set -o pipefail
 
           MODULE_VERSION=$(./pkl eval -f json src/PklProject | jq -r .package.version)
-          if [ -z "${MODULE_VERSION:-}" ]; then
-            echo "Couldn't read module version!"
+          MODULE_NAME=$(./pkl eval -f json src/PklProject | jq -r .package.name)
+
+          if [ -z "${MODULE_VERSION:-}" ] || [ -z "${MODULE_NAME:-}" ]; then
+            echo "Couldn't read module version or name!"
             exit 1
           fi
 
           echo "MODULE_VERSION=${MODULE_VERSION}" | tee -a "$GITHUB_OUTPUT"
+          echo "MODULE_TAG=${MODULE_NAME}@${MODULE_VERSION}" | tee -a "$GITHUB_OUTPUT"
       - name: Check for existing release
         id: check-for-existing-release
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
         env:
           MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
+          MODULE_TAG: "${{ steps.load-module-version.outputs.MODULE_TAG }}"
         with:
           script: |
             const module_version = process.env.MODULE_VERSION;
-            console.log(`Checking for a release of version ${module_version}`)
+            const module_tag = process.env.MODULE_TAG;
+            console.log(`Checking for a release of version ${module_version} with tag ${module_tag}`)
 
             try {
               const release = await github.rest.repos.getReleaseByTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                tag: module_version,
+                tag: module_tag,
               })
               console.log(`Release found for version ${module_version}, no need to do a new release`)
               core.setOutput('RELEASE_EXISTS', 'true')
@@ -81,8 +86,8 @@ jobs:
       - if: steps.check-for-existing-release.outputs.RELEASE_EXISTS == 'false'
         name: Release new version
         env:
-          MODULE_VERSION: "${{ steps.load-module-version.outputs.MODULE_VERSION }}"
+          MODULE_TAG: "${{ steps.load-module-version.outputs.MODULE_TAG }}"
           GH_TOKEN: "${{ github.token }}"
         run: |
-          echo "Creating release ${MODULE_VERSION}"
-          gh release create --generate-notes --latest "${MODULE_VERSION}" build/*
+          echo "Creating release ${MODULE_TAG}"
+          gh release create --generate-notes --latest "${MODULE_TAG}" build/*

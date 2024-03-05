@@ -1,13 +1,13 @@
 amends "pkl:Project"
 
 package {
-  name = "concourse_pipeline"
+  name = "pkl-concourse-pipeline"
   version = "0.0.1"
   license = "MIT"
   baseUri = "package://pkg.pkl-lang.org/github.com/alphagov/pkl-concourse-pipeline"
   sourceCode = "https://github.com/alphagov/pkl-concourse-pipeline"
   sourceCodeUrlScheme = "\(sourceCode)/blob/\(name)@\(version)%{path}#L%{line}-L%{endLine}"
-  packageZipUrl = "\(sourceCode)/releases/download/\(version)/\(name)@\(version).zip"
+  packageZipUrl = "https://github.com/alphagov/pkl-concourse-pipeline/releases/download/\(name)@\(version)/\(name)@\(version).zip"
   description = """
   Pkl Modules for concourse pipelines.
   
