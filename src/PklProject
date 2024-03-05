@@ -7,7 +7,7 @@ package {
   baseUri = "package://pkg.pkl-lang.org/github.com/alphagov/pkl-concourse-pipeline"
   sourceCode = "https://github.com/alphagov/pkl-concourse-pipeline"
   sourceCodeUrlScheme = "\(sourceCode)/blob/\(name)@\(version)%{path}#L%{line}-L%{endLine}"
-  packageZipUrl = "\(sourceCode)/releases/download/\(version)/\(name)@\(version).zip"
+  packageZipUrl = "\(sourceCode)/releases/download/\(version)/pkl-concourse-pipeline@\(version).zip"
   description = """
   Pkl Modules for concourse pipelines.
   
