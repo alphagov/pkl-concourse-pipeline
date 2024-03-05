@@ -42,14 +42,15 @@ jobs:
           set -o pipefail
 
           MODULE_VERSION=$(./pkl eval -f json src/PklProject | jq -r .package.version)
+          MODULE_NAME=$(./pkl eval -f json src/PklProject | jq -r .package.name)
 
-          if [ -z "${MODULE_VERSION:-}" ]; then
-            echo "Couldn't read module version!"
+          if [ -z "${MODULE_VERSION:-}" ] || [ -z "${MODULE_NAME:-}" ]; then
+            echo "Couldn't read module version or name!"
             exit 1
           fi
 
           echo "MODULE_VERSION=${MODULE_VERSION}" | tee -a "$GITHUB_OUTPUT"
-          echo "MODULE_TAG=pkl-concourse-pipeline@${MODULE_VERSION}" | tee -a "$GITHUB_OUTPUT"
+          echo "MODULE_TAG=${MODULE_NAME}@${MODULE_VERSION}" | tee -a "$GITHUB_OUTPUT"
       - name: Check for existing release
         id: check-for-existing-release
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
