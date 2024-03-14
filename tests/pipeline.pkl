@@ -15,8 +15,8 @@ jobs = new {
           image_resource = new {
             type = "registry-image"
             source = new {
-                ["repository"] = "governmentdigitalservice/pay-node-runner"
-                ["tag"] = "node18"
+              ["repository"] = "governmentdigitalservice/pay-node-runner"
+              ["tag"] = "node18"
             }
           }
           run = new {
