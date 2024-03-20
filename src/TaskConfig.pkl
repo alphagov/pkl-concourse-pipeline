@@ -3,7 +3,7 @@ module concourse_pipeline.TaskConfig
 import "./Pipeline.pkl"
 
 platform: "linux"|"darwin"|"windows"
-image_resource: AnonymousResource
+image_resource: AnonymousResource?
 inputs: Listing<Input>?
 outputs: Listing<Output>?
 caches: Listing<Cache>?
