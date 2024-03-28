@@ -2,7 +2,7 @@ amends "pkl:Project"
 
 package {
   name = "pkl-concourse-pipeline"
-  version = "0.0.3"
+  version = "0.0.4"
   license = "MIT"
   baseUri = "package://pkg.pkl-lang.org/github.com/alphagov/pkl-concourse-pipeline"
   sourceCode = "https://github.com/alphagov/pkl-concourse-pipeline"

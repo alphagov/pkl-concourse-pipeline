@@ -1,0 +1,97 @@
+module concourse_pipeline.Resources
+
+import "./Pipeline.pkl"
+
+open class GitResource extends Pipeline.Resource {
+  type = "git"
+  icon = "github"
+  source: GitResourceConfig
+}
+
+class GitResourceConfig {
+  uri: Uri
+  branch: String?
+  private_key: String?
+  private_key_user: String?
+  private_key_passphrase: String?
+  forward_agent: Boolean?
+  username: String?
+  password: String?
+  paths: Listing<String>?
+  ignore_paths: Listing<String>?
+  skip_ssl_verification: Boolean?
+  tag_filter: String?
+  tag_regex: String?
+  fetch_tags: Boolean?
+  submodule_credentials: Listing<SubmoduleCredentials>?
+  git_config: Mapping<String, String>?
+  disable_ci_skip: Boolean?
+  commit_verification_keys: Listing<String>?
+  commit_verification_key_ids: Listing<String>?
+  gpg_keyserver: Uri?
+  git_crypt_key: String?
+  https_tunnel: HttpsTunnel?
+  commit_filter: CommitFilter?
+  version_depth: Int?
+  search_remote_refs: Boolean?
+}
+
+abstract class SubmoduleCredentials {}
+
+class HttpCredentials extends SubmoduleCredentials {
+  host: String
+  username: String
+  password: String
+}
+
+class SshCredentials extends SubmoduleCredentials {
+  url: Uri
+  private_key: String
+  private_key_passphrase: String?
+}
+
+class HttpsTunnel {
+  proxy_host: String?
+  proxy_port: String?
+  proxy_user: String?
+  proxy_password: String?
+}
+
+class CommitFilter {
+  exclude: Listing<String>?
+  include: Listing<String>?
+}
+
+open class DockerImageResource extends Pipeline.Resource {
+  type = "registry-image"
+  icon = "docker"
+  source: DockerImageResourceConfig
+}
+
+class DockerImageResourceConfig {
+  repository: String
+  tag: String?
+  username: String?
+  password: String?
+  additional_private_registries: Listing<PrivateRegistry>?
+  aws_access_key_id: String?
+  aws_secret_access_key: String?
+  aws_session_token: String?
+  insecure_registries: Listing<String>?
+  registry_mirror: Uri?
+  ca_certs: Listing<CaCert>?
+  client_certs: Listing<CaCert>?
+  max_concurrent_downloads: Int?
+  max_concurrent_uploads: Int?
+}
+
+class PrivateRegistry {
+  registry: String
+  username: String
+  password: String
+}
+
+class CaCert {
+  domain: String
+  cert: String
+}
