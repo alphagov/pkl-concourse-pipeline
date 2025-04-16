@@ -5,7 +5,7 @@ image_resource = new {
   type = "registry-image"
   source = new {
     ["repository"] = "governmentdigitalservice/pay-node-runner"
-    ["tag"] = "node18"
+    ["tag"] = "node22"
   }
 }
 
