@@ -198,6 +198,18 @@ open class SSMConfig {
   region: String
 }
 
+open class IDTokenVarSource extends VarSource {
+  type: "idtoken"
+  config: IDTokenConfig
+}
+
+open class IDTokenConfig {
+  audience: Listing<String>
+  subject_scope: "team" | "pipeline" | "instance" | "job" | String
+  expires_in: ConcourseDuration
+  algorithm: "RS256" | "ES256" | String
+}
+
 open class DummyVarSource extends VarSource {
   type: "dummy"
   config: DummyConfig
