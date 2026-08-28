@@ -37,7 +37,7 @@ resources = new {
     type = "git"
     icon = "github"
     source = new {
-      ["uri"] = "https://github.com/alphagov/pkl-concourse-pipeline"
+      ["uri"] = "https://github.com/govuk-pay/pkl-concourse-pipeline"
       ["branch"] = "main"
     }
   }

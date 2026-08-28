@@ -4,10 +4,10 @@ package {
   name = "pkl-concourse-pipeline"
   version = "0.0.5"
   license = "MIT"
-  baseUri = "package://pkg.pkl-lang.org/github.com/alphagov/pkl-concourse-pipeline"
-  sourceCode = "https://github.com/alphagov/pkl-concourse-pipeline"
+  baseUri = "package://pkg.pkl-lang.org/github.com/govuk-pay/pkl-concourse-pipeline"
+  sourceCode = "https://github.com/govuk-pay/pkl-concourse-pipeline"
   sourceCodeUrlScheme = "\(sourceCode)/blob/\(name)@\(version)/src%{path}#L%{line}-L%{endLine}"
-  packageZipUrl = "https://github.com/alphagov/pkl-concourse-pipeline/releases/download/\(name)@\(version)/\(name)@\(version).zip"
+  packageZipUrl = "https://github.com/govuk-pay/pkl-concourse-pipeline/releases/download/\(name)@\(version)/\(name)@\(version).zip"
   description = """
   Pkl Modules for concourse pipelines.
 
